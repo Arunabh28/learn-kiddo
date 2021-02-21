@@ -2,6 +2,7 @@
 <b-container>  
   <div id="app">
     <subject/>
+    
      <!-- route outlet -->
   <!-- component matched by the route will render here -->
   <div class=row>

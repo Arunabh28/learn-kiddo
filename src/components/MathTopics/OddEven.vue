@@ -1,78 +1,118 @@
 <template>
-    <div class="col-sm-12"> 
-        <h3>{{question}}</h3>
-        <div class="d-flex justify-content-center">
-            <div v-for="index in objectNumber" :key="index">
-                <img class="img-fluid" :alt="objectName" :src="objectImage" style="width:8rem;height:8rem;" />
+    
+    <div class="jumbotron" v-bind="questionModel"> 
+       
+        <div class="row">
+            <h3 class="m-auto" v-on:change="speak('header')">Hi!! Can you count {{question.number1Image}}? Is it even or odd?</h3>
+        </div>
+        <div class="row">
+            
+            <div class="d-flex justify-content">
+                
+                <div class="ml-auto" v-for="index in question.number1" :key="index">
+                    <img class="img img-fluid" :alt="question.number1Image" :src="question.number1Url" style="width:8rem;height:8rem;" />
+                </div>
+
             </div>
         </div>
-        <div class="row m-3 p-3">
-            <div class="col-sm-offset-3 col-sm-3">
-                <input type="button" class="btn btn-lg btn-primary" 
-                value="Odd" id="oddButton"/>
-            </div>
-            <div class="col-sm-offset-3 col-sm-3">
-                <input type="button" class="btn btn-lg btn-warning" 
-                value="Even" id="evenButton"/>
-            </div>
+        <div class="row .sketchPad">
+            <sketchPad v-bind:canvasWidth="canvasWidth"></sketchPad>
         </div>
+            <div class="row mt-3">
+                <div class="col-sm-12">
+                <div class="d-flex justify-content">
+                    <div class="ml-auto">
+                        <input type="button" class="btn btn-lg btn-primary" 
+                    value="Odd" id="oddButton" v-on:click="validateAnswer('Odd')"/>
+                    </div>
+                    <div class="ml-auto">
+                    <input type="button" class="btn btn-lg btn-warning" 
+                    value="Even" id="evenButton"  v-on:click="validateAnswer('Even')"/>
+                    </div>
+                    <div class="ml-auto">
+                    <input type="button" class="btn btn-lg btn-info" 
+                    value="Next" id="nextButton" v-on:click="onNext()"/>
+                    </div>
+                </div>
+                </div>
+
+                
+                
+               
+            </div>
+        
+        
         
     </div>
 </template>
 
 <script>
-import appImages from '../../assets/data/AppImages.js';
-import textToSpeach from '../../assets/data/Speech.js';
+
+import oddEvenView from '../../model/OddEvenViewModel'
+import mathQuestion from '../../model/MathQuestionModel'
+import sketchPad from '../DrawingBoard'
+
+
 export default {
   name: 'OddEven',
-  data:function(){
-      return{
-          question:String,
-          objectName:String,
-          objectImage:String,
-          objectNumber:Number
-      }
-  },  
-   
-    created:function(){
-      this.objectNumber=0;
-      this.objectName = "";
-      this.objectImage = "";
-      
-      
+  props:{
+        questionModel:oddEvenView
     },
-    mounted:function(){
-        this.objectNumber=Math.floor(Math.random() * (9) ) + 1;
-        var images=appImages.appImages;
-        var selectedImage = images[Math.floor(Math.random() * (images.length - 1) ) + 1];
-        console.log(selectedImage);
-        this.objectName = selectedImage.ImageName;
-        this.objectImage = selectedImage.ImageUrl;
-        this.question = "Count the number of "+this.objectName +". Tell if it is even or odd?";
-        textToSpeach.textToSpeach.speak(this.question);
-        if(this.objectNumber%2===0)
-        {
-            document.getElementById("oddButton").addEventListener("click",function(){
-                textToSpeach.textToSpeach.speak("Odd is wrong..");
-            });
-            document.getElementById("evenButton").addEventListener("click",function(){
-                textToSpeach.textToSpeach.speak("You did it!! Even is correct! Good job");
-                setTimeout(() => {
-                    location.reload();
-                }, 3000);
-            });
-        }else{
-                document.getElementById("oddButton").addEventListener("click",function(){
-                    textToSpeach.textToSpeach.speak("You did it!! Odd is correct");
-                    setTimeout(() => {
-                        location.reload();
-                    }, 3000);
-                });
-                document.getElementById("evenButton").addEventListener("click",function(){
-                    textToSpeach.textToSpeach.speak("Even is wrong..");
-                });
-            }
+    components:{
+        sketchPad
+    },
+    data:function(){
+        return{
+            oddEvenQuestions:oddEvenView,
+            question:mathQuestion
+        }
+    },
+    created:function(){
         
+        this.oddEvenQuestions=this.questionModel;
+        this.question=this.questionModel.currentQuestion;
+        
+        
+    },
+    computed:{
+        canvasWidth:function(){
+            var elem=document.getElementsByClassName("sketchPad")[0];
+            return elem===undefined?(window.innerWidth *0.75) + "px":(elem.clientWidth*0.8) + "px" ;
+        }
+    },
+    methods:{
+        onNext:function(){
+            console.log("onNext clicked!!");
+            let id=this.question.id;
+            let nextQuestion = this.oddEvenQuestions.questions.filter(item=>{return item.id===id+1});
+            if(nextQuestion.length===0)
+            {
+                this.$emit("onComplete");
+            }
+            this.question=nextQuestion[0];
+            this.question.answered=false;
+            this.question.isCorrect=false;
+        },
+        validateAnswer:function(response){
+            if(this.question===null)
+            return;
+            if(this.question.result===response)
+            {
+                this.speak("You got it!! It is " + response);
+                this.question.isCorrect=true;
+            }            
+            else
+            {
+                this.speak("Oh no. You got it wrong!! It is " + this.question.result);
+                this.question.isCorrect=false;
+            }  
+            
+            this.oddEvenQuestions.currentQuestion.answered=true;
+        },
+        speak:function(text){
+            this.$emit('speak',text);
         }
     }
-  </script>
+
+}
+</script>
