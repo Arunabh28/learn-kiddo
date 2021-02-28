@@ -3,7 +3,7 @@
     <div class="jumbotron" v-bind="questionModel"> 
        
         <div class="row">
-            <h3 class="m-auto" v-on:change="speak('header')">Hi!! Can you count {{question.number1Image}}? Is it even or odd?</h3>
+            <h3 class="m-auto">Hi!! Can you count {{question.number1Image}}? Is it even or odd?</h3>
         </div>
         <div class="row">
             
@@ -16,7 +16,7 @@
             </div>
         </div>
         <div class="row .sketchPad">
-            <sketchPad v-bind:canvasWidth="canvasWidth"></sketchPad>
+            <sketchPad v-bind:canvasWidth="canvasWidth" v-bind:canvasHeight="100" v-bind:showNumber=true></sketchPad>
         </div>
             <div class="row mt-3">
                 <div class="col-sm-12">
@@ -74,10 +74,13 @@ export default {
         
         
     },
+    mounted:function(){
+        this.speak('Hi!! Can you count '+this.question.number1Image + '. Is it even or odd?');
+    },
     computed:{
         canvasWidth:function(){
             var elem=document.getElementsByClassName("sketchPad")[0];
-            return elem===undefined?(window.innerWidth *0.75) + "px":(elem.clientWidth*0.8) + "px" ;
+            return elem===undefined?(window.innerWidth *0.75) :(elem.clientWidth*0.8) + "px" ;
         }
     },
     methods:{
@@ -92,6 +95,7 @@ export default {
             this.question=nextQuestion[0];
             this.question.answered=false;
             this.question.isCorrect=false;
+            this.speak('Can you now count number of '+ this.question.number1Image + '? Is it even or odd?');
         },
         validateAnswer:function(response){
             if(this.question===null)

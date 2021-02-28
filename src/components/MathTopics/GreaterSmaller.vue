@@ -1,23 +1,31 @@
 <template>
     
-    <div class="jumbotron" v-bind="question" :key="question.id"> 
+    <div class="jumbotron"> 
         <h3>Choose the smaller/grater number</h3>
-        <h3>Hi!! Can you count {{question.number1Image}}? Is it even or odd?</h3>
-        <div class="d-flex justify-content-center">
-            <div v-for="index in question.number1" :key="index">
-                <img class="img-fluid" :alt="question.number1Image" :src="question.number1Url" style="width:8rem;height:8rem;" />
+        
+        <div class="row" v-bind:class="borderClass">
+            <div class="col-sm-4 col-md-4 display-2 m-auto bg-white">{{question.number1}}</div>
+            <div class="col-sm-2 col-md-2">
+                <div class="d-flex flex-column">
+                   
+                <input type="button" class="btn btn-small btn-primary m-auto" v-on:click="validateAnswer('Greater')" value=">"/>
+                <br/>
+                <input  type="button"  class="btn btn-small btn-secondary m-auto" v-on:click="validateAnswer('Equal')" value="="/>
+                <br/>
+                <input  type="button"  class="btn btn-small btn-warning m-auto" v-on:click="validateAnswer('Lesser')" value="<"/>
+                </div>
+            </div>
+            <div class="col-sm-4 col-md-4 display-2 m-auto bg-white">{{question.number2}}
+                
+            </div>
+            <div class="col-sm-2" v-show="question && question.answered">
+                <span v-if="question.isCorrect" class="text-success"><sup>correct</sup></span>
+                <span v-if="!question.isCorrect" class="text-danger"><sup>wrong</sup></span>
             </div>
         </div>
-        <div class="row m-3 p-3">
-            <div class="col-sm-offset-3 col-sm-3">
-                <input type="button" class="btn btn-lg btn-primary" 
-                value="Odd" id="oddButton" v-on:click="validateAnswer('Odd')"/>
-            </div>
-            <div class="col-sm-offset-3 col-sm-3">
-                <input type="button" class="btn btn-lg btn-warning" 
-                value="Even" id="evenButton"  v-on:click="validateAnswer('Even')"/>
-            </div>
-            <div class="col-sm-offset-3 col-sm-3">
+       
+        <div class="row m-3 p-3">            
+            <div class="ml-auto">
                 <input type="button" class="btn btn-lg btn-info" 
                 value="Next" id="nextButton" v-on:click="onNext()"/>
             </div>
@@ -26,53 +34,82 @@
     </div>
 </template>
 <script>
-import oddEvenView from '../../model/OddEvenViewModel'
-import mathQuestion from '../../model/MathQuestionModel'
+
+import questionModel from '../../model/MathQuestionModel'
 export default {
     name:"GreaterSmaller",
     props:{
-        questionModel:oddEvenView
+        numberOfQuestions:Number,
+        maxNumber:Number
     },
     data:function(){
         return{
-            oddEvenQuestions:oddEvenView,
-            question:mathQuestion
+           model:Array<questionModel>=[],
+           question:questionModel
+            
         }
     },
     created:function(){
-        this.oddEvenQuestions=this.questionModel;
-        this.question=this.questionModel.currentQuestion;
+        this.model=new Array(this.numberOfQuestions);
+        this.buildModel();
+        this.question=this.model[0];
         
     },
+    computed:{
+        borderClass:function(){
+            if(this.question===undefined)
+                return "";
+             if(!this.question.answered)
+                return "";
+            if(this.question.isCorrect)
+                return "border border-success";
+            return "border border-danger";
+        }
+    },
     methods:{
+        buildModel:function(){
+            var arr=[];
+            while (arr.length<this.numberOfQuestions) {
+                var rnd = Math.floor(Math.random()*this.maxNumber+1);
+                if(arr.indexOf(rnd)<0)
+                {
+                    arr.push(rnd);
+                    
+                    var i=arr.length-1;
+                    
+                    var rnd2 = Math.floor(Math.random()*this.maxNumber+1);
+                    var qm=new Object();
+                    
+                    qm.id=arr.length;
+                    qm.number1=rnd;
+                    qm.number2=rnd2;
+                    qm.answered=false;
+                    qm.result= rnd===rnd2?"Equal":(rnd>rnd2?"Greater":"Lesser");
+                    this.model[i]=qm;
+                }
+            }
+            
+        },
+       
         onNext:function(){
-            console.log("onNext clicked!!");
-            var id=this.question.id;
-            var nextQuestion = this.oddEvenQuestions.questions.filter(item=>{return item.id===id+1});
+            let id=this.question.id;
+            let nextQuestion = this.model.filter(item=>{return item.id===id+1});
+            console.log(nextQuestion.length);
             if(nextQuestion.length===0)
             {
                 this.$emit("onComplete");
+                return;
             }
             this.question=nextQuestion[0];
-            this.question.answered=false;
-            this.question.isCorrect=false;
         },
         validateAnswer:function(response){
-            if(this.question===null)
-            return;
-            var speakOut="";
+            
+            this.question.answered=false;
+            this.question.isCorrect=false;
             if(this.question.result===response)
-            {
-                speakOut="You got it!! It is " + response;
                 this.question.isCorrect=true;
-            }            
-            else
-            {
-                speakOut="Oh no. You got it wrong!! It is " + this.question.result;
-                this.question.isCorrect=false;
-            }  
-            console.log(speakOut);
-            this.oddEvenQuestions.currentQuestion.answered=true;
+            this.question.answered=true;
+            return;
         }
     }
 

@@ -1,6 +1,6 @@
 <template>
 <b-container>  
-  <div id="app">     
+  <div id="app" class="bkg-animated">     
     <div class=row>
         <div class="col-sm-12">
             <section v-if="ShowSection('View Topics')"> 
@@ -23,12 +23,22 @@
                 </div>
                 
                 <oddEvenCard v-bind:questionModel="oddEvenQuestions" 
-                v-on:onComplete="oddEvenNext" v-on:speak="SpeakTheText"></oddEvenCard>
+                v-on:onComplete="NavigateToTopic('View Topics')" v-on:speak="SpeakTheText"></oddEvenCard>
 
             </section>
             <section v-if="ShowSection('Maths/GreaterSmaller')" >
-                <comparisonCard v-bind:questionModel="oddEvenQuestions">
-                    <input type="button" class="btn btn-small btn-info" value="Back"/>
+                <div class="row">
+                    <div class="col-sm-1">
+                        <button type="button" class="btn btn-secondary btn-circle btn-sm" v-on:click="NavigateToTopic('View Topics')">
+                            Home
+                        </button>
+                    </div>
+                    
+                </div>
+                <comparisonCard v-bind:numberOfQuestions="5" v-bind:maxNumber="20"
+                v-on:speak="SpeakTheText" v-on:onComplete="NavigateToTopic('View Topics')"
+                >
+                    
                 </comparisonCard>
 
             </section>
@@ -42,15 +52,15 @@
 </template>
 
 <script>
-import speaker from './assets/data/Speech'
+import speaker from './data/Speech'
 import card from './components/CardComponent.vue'
 import oddEvenCard from './components/MathTopics/OddEven.vue'
 import comparisonCard from './components/MathTopics/GreaterSmaller.vue'
 //View Model
 import oddEvenView from './model/OddEvenViewModel'
 //Data imports
-import mathTopics from './assets/data/MathTopics'
-import oddEvenQuestionData from './assets/data/OddEvenQuestion'
+import mathTopics from './data/MathTopics'
+import oddEvenQuestionData from './data/OddEvenQuestion_L1'
 
 
 export default {
