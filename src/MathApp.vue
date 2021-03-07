@@ -42,6 +42,18 @@
                 </comparisonCard>
 
             </section>
+            <section v-if="ShowSection('Maths/TraceNumber')" >
+                <div class="row">
+                    <div class="col-sm-1">
+                        <button type="button" class="btn btn-secondary btn-circle btn-sm" v-on:click="NavigateToTopic('View Topics')">
+                            Home
+                        </button>
+                    </div>
+                    
+                </div>
+                <tracingCard v-bind:NumberOfTraces="3" v-bind:MaxNumber="20"></tracingCard>
+
+            </section>
         </div>        
 
     </div>
@@ -56,6 +68,7 @@ import speaker from './data/Speech'
 import card from './components/CardComponent.vue'
 import oddEvenCard from './components/MathTopics/OddEven.vue'
 import comparisonCard from './components/MathTopics/GreaterSmaller.vue'
+import tracingCard from './components/MathTopics/TraceNumber.vue'
 //View Model
 import oddEvenView from './model/OddEvenViewModel'
 //Data imports
@@ -69,6 +82,7 @@ export default {
     card,
     oddEvenCard,
     comparisonCard,
+    tracingCard
     
   },
   data:function(){
